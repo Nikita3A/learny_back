@@ -1,4 +1,3 @@
-// src/courses/lesson.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Unit } from './unit.entity';
 
@@ -10,6 +9,6 @@ export class Lesson {
   @Column()
   title: string;
 
-  @ManyToOne(() => Unit, (unit) => unit.lessons)
+  @ManyToOne(() => Unit, (unit) => unit.lessons, { onDelete: 'CASCADE' })
   unit: Unit;
 }

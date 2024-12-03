@@ -1,4 +1,3 @@
-// src/courses/course.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Unit } from './unit.entity';
 
@@ -22,6 +21,6 @@ export class Course {
   @Column('text')
   courseStructure: string;
 
-  @OneToMany(() => Unit, (unit) => unit.course, { cascade: true })
+  @OneToMany(() => Unit, (unit) => unit.course, { cascade: true, onDelete: 'CASCADE' })
   units: Unit[];
 }
