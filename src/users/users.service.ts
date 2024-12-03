@@ -5,6 +5,7 @@ import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { User } from './models/user.entity';
 import { IUser } from './models/user.interface';
 import { AuthService } from '../auth/auth.service';
+import { Course } from 'src/courses/models/course.entity';
 // import { User } from '../users/models/user.entity';
 @Injectable()
 export class UsersService {
@@ -12,20 +13,9 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    // private readonly authService: AuthService,
   ) {}
 
   async signup(user): Promise<any> {
-    // this.logger.log(`User signup: ${JSON.stringify(user)}`);
-    // const passwordHash = await this.authService.hashPassword(user.password);
-    // const newUser = new User();
-    // newUser.username = user.username;
-    // newUser.email = user.email;
-    // newUser.password = user.passwordHash;
-    // newUser.isEmailVerified = false;
-    // newUser.created_on = new Date().toLocaleDateString();
-    // newUser.last_login = new Date().toLocaleDateString();
-
     const savedUser = await this.usersRepository.save(user);
     const { password, ...result } = savedUser;
     return result;
@@ -40,7 +30,6 @@ export class UsersService {
   }
 
   findOneById(id): Promise<User> {
-    // return this.usersRepository.findOne(id);
     return this.usersRepository.findOneBy({ id: id });
   }
   async getUsersChat(id: string | number) {
@@ -57,5 +46,23 @@ export class UsersService {
 
   remove(id: string): Observable<DeleteResult> {
     return from(this.usersRepository.delete(id));
+  }
+
+  async addCourseToUser(userId: number, course: Course): Promise<void> {
+    // Find the user by their ID
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['courses'], // Ensure courses are included in the response
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Add the new course to the user's courses
+    user.courses = [...(user.courses || []), course];
+
+    // Save the updated user back to the database
+    await this.usersRepository.save(user);
   }
 }

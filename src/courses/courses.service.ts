@@ -7,22 +7,23 @@ import { Unit } from './models/unit.entity';
 import { Lesson } from './models/lesson.entity';
 import { CreateCourseDto } from './models/course.interface';
 import { AiService } from '../ai/ai.service';
-
+import { UsersService } from 'src/users/users.service';
+import { UpdateCourseDto } from './models/UpdateCourseDto.model';
 
 @Injectable()
 export class CoursesService {
   constructor(
     private aiService: AiService,
+    private usersService: UsersService,
     @InjectRepository(Course)
     private courseRepository: Repository<Course>,
     @InjectRepository(Unit)
     private unitRepository: Repository<Unit>,
     @InjectRepository(Lesson)
     private lessonRepository: Repository<Lesson>,
-  ) {}
-
-  // async createCourse(createCourseDto: CreateCourseDto, provider: 'gpt' | 'groq'): Promise<Course> {
-  async createCourse(createCourseDto: CreateCourseDto): Promise<Course> {
+  ) {}   
+  
+  async createCourse(createCourseDto: CreateCourseDto, userId: number): Promise<Course> {
     const { language, theme, targetAudience, learningObjectives, courseStructure } = createCourseDto;
   
     const prompt = `You are an AI tasked with creating a course plan. Please respond only with a valid JSON object. 
@@ -49,46 +50,38 @@ export class CoursesService {
     Course Structure: ${courseStructure}.
     
     Please respond only with the JSON structure above, nothing else.`;
-  
-    // Step 1: Generate response from the selected AI
+
     const aiResponse = await this.aiService.generateWithGroq(prompt);
-  
-    // Step 2: Parse and validate the AI response
     const coursePlan = this.parseCoursePlanResponse(aiResponse);
   
-    // Step 3: Create the Course entity
     const course = this.courseRepository.create({
       language,
       theme,
       targetAudience,
       learningObjectives,
       courseStructure,
+      createdBy: userId,
       units: [],
     });
   
-    // Step 4: Populate units and lessons
     for (const unitData of coursePlan.units) {
       const unit = new Unit();
       unit.title = unitData.title;
-  
-      // Do not set `unit.course` to avoid circular reference
-      unit.lessons = [];
-  
-      for (const lessonTitle of unitData.lessons) {
+      unit.lessons = unitData.lessons.map((lessonTitle) => {
         const lesson = new Lesson();
         lesson.title = lessonTitle;
-  
-        // Avoid setting `lesson.unit` explicitly here
-        unit.lessons.push(lesson);
-      }
-  
+        return lesson;
+      });
       course.units.push(unit);
     }
+
+    const savedCourse = await this.courseRepository.save(course);
   
-    // Save course and its relations
-    return await this.courseRepository.save(course); // TypeORM handles relationships post-save
-  }    
+    await this.usersService.addCourseToUser(userId, savedCourse);
   
+    return savedCourse;
+  }
+
   private parseCoursePlanResponse(response: string | object): { units: { title: string; lessons: string[] }[] } {
     let parsedResponse;
   
@@ -132,6 +125,66 @@ export class CoursesService {
       where: { id },
       relations: ['units', 'units.lessons'],
     });
+  }
+
+  async getUserCourses(userId: number): Promise<Course[]> {
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new Error('User not found');
+
+    return this.courseRepository.find({
+      where: { createdBy: userId },
+      relations: ['units', 'units.lessons'],
+    });
+  }
+
+  async deleteCourse(courseId: number, userId: number): Promise<boolean> {
+    const course = await this.courseRepository.findOneBy({ id: courseId });
+    if (!course || course.createdBy !== userId) {
+      return false;
+    }
+
+    await this.courseRepository.remove(course);
+    return true;
+  }
+
+  async updateCourse(courseId: number, updateCourseDto: UpdateCourseDto, userId: number): Promise<Course | null> {
+    const course = await this.courseRepository.findOne({
+      where: { id: courseId },
+      relations: ['units', 'units.lessons'],
+    });
+
+    if (!course || course.createdBy !== userId) {
+      return null;
+    }
+
+    const { language, theme, targetAudience, learningObjectives, courseStructure, units } = updateCourseDto;
+
+    course.language = language ?? course.language;
+    course.theme = theme ?? course.theme;
+    course.targetAudience = targetAudience ?? course.targetAudience;
+    course.learningObjectives = learningObjectives ?? course.learningObjectives;
+    course.courseStructure = courseStructure ?? course.courseStructure;
+
+    if (units) {
+      course.units = await Promise.all(
+        units.map(async (unitDto) => {
+          const unit = await this.unitRepository.findOne({ where: { id: unitDto.id } }) || new Unit();
+          unit.title = unitDto.title;
+
+          unit.lessons = await Promise.all(
+            unitDto.lessons.map(async (lessonDto) => {
+              const lesson = await this.lessonRepository.findOne({ where: { id: lessonDto.id } }) || new Lesson();
+              lesson.title = lessonDto.title;
+              return lesson;
+            }),
+          );
+
+          return unit;
+        }),
+      );
+    }
+
+    return this.courseRepository.save(course);
   }
 
   // Helper method to make a request to ChatGPT API and retrieve the course plan using fetch

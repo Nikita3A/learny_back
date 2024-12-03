@@ -1,5 +1,3 @@
-import { Chat } from 'src/chat/models/chat.entity';
-import { Message } from 'src/chat/models/message.entity';
 import {
   Entity,
   Column,
@@ -8,6 +6,9 @@ import {
   ManyToMany,
   OneToMany,
 } from 'typeorm';
+import { Chat } from 'src/chat/models/chat.entity';
+import { Message } from 'src/chat/models/message.entity';
+import { Course } from 'src/courses/models/course.entity';
 
 @Entity()
 export class User {
@@ -32,23 +33,34 @@ export class User {
   @Column()
   isEmailVerified: boolean;
 
-  // @ManyToMany(() => Chat, (chat) => chat.users)
-  // @JoinTable()
-  // chats: Chat[];
   @ManyToMany(() => Chat, (chat) => chat.users)
   @JoinTable({
-    name: 'user_chats_chat', // name of the table that will be created in the database
+    name: 'user_chats_chat',
     joinColumn: {
-      name: 'userId', // column name in the junction table
-      referencedColumnName: 'id', // column name in the owner entity
+      name: 'userId',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'chatId', // column name in the junction table
-      referencedColumnName: 'id', // column name in the inverse entity
+      name: 'chatId',
+      referencedColumnName: 'id',
     },
   })
   chats: Chat[];
 
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
+
+  @ManyToMany(() => Course, (course) => course.users)
+  @JoinTable({
+    name: 'user_courses', // Name of the junction table
+    joinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'courseId',
+      referencedColumnName: 'id',
+    },
+  })
+  courses: Course[];
 }

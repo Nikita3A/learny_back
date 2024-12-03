@@ -6,4 +6,5 @@ export interface CreateCourseDto {
     learningObjectives: string;
     courseStructure: string;
   }
+
   

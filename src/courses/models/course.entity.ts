@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany } from 'typeorm';
+import { User } from '../../users/models/user.entity';
 import { Unit } from './unit.entity';
 
 @Entity()
@@ -20,6 +21,12 @@ export class Course {
 
   @Column('text')
   courseStructure: string;
+
+  @Column('integer')
+  createdBy: number;
+
+  @ManyToMany(() => User, (user) => user.courses)
+  users: User[];
 
   @OneToMany(() => Unit, (unit) => unit.course, { cascade: true, onDelete: 'CASCADE' })
   units: Unit[];
