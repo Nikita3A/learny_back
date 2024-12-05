@@ -147,45 +147,63 @@ export class CoursesService {
     return true;
   }
 
-  async updateCourse(courseId: number, updateCourseDto: UpdateCourseDto, userId: number): Promise<Course | null> {
-    const course = await this.courseRepository.findOne({
-      where: { id: courseId },
-      relations: ['units', 'units.lessons'],
-    });
+  // async updateCourse(courseId: number, updateCourseDto: UpdateCourseDto, userId: number): Promise<Course | null> {
+  //   const course = await this.courseRepository.findOne({
+  //     where: { id: courseId },
+  //     relations: ['units', 'units.lessons'],
+  //   });
 
-    if (!course || course.createdBy !== userId) {
-      return null;
-    }
+  //   if (!course || course.createdBy !== userId) {
+  //     return null;
+  //   }
 
-    const { language, theme, targetAudience, learningObjectives, courseStructure, units } = updateCourseDto;
+  //   const { language, theme, targetAudience, learningObjectives, courseStructure, units } = updateCourseDto;
 
-    course.language = language ?? course.language;
-    course.theme = theme ?? course.theme;
-    course.targetAudience = targetAudience ?? course.targetAudience;
-    course.learningObjectives = learningObjectives ?? course.learningObjectives;
-    course.courseStructure = courseStructure ?? course.courseStructure;
+  //   course.language = language ?? course.language;
+  //   course.theme = theme ?? course.theme;
+  //   course.targetAudience = targetAudience ?? course.targetAudience;
+  //   course.learningObjectives = learningObjectives ?? course.learningObjectives;
+  //   course.courseStructure = courseStructure ?? course.courseStructure;
 
-    if (units) {
-      course.units = await Promise.all(
-        units.map(async (unitDto) => {
-          const unit = await this.unitRepository.findOne({ where: { id: unitDto.id } }) || new Unit();
-          unit.title = unitDto.title;
+  //   if (units) {
+  //     course.units = await Promise.all(
+  //       units.map(async (unitDto) => {
+  //         const unit = await this.unitRepository.findOne({ where: { id: unitDto.id } }) || new Unit();
+  //         unit.title = unitDto.title;
 
-          unit.lessons = await Promise.all(
-            unitDto.lessons.map(async (lessonDto) => {
-              const lesson = await this.lessonRepository.findOne({ where: { id: lessonDto.id } }) || new Lesson();
-              lesson.title = lessonDto.title;
-              return lesson;
-            }),
-          );
+  //         unit.lessons = await Promise.all(
+  //           unitDto.lessons.map(async (lessonDto) => {
+  //             const lesson = await this.lessonRepository.findOne({ where: { id: lessonDto.id } }) || new Lesson();
+  //             lesson.title = lessonDto.title;
+  //             return lesson;
+  //           }),
+  //         );
 
-          return unit;
-        }),
-      );
-    }
+  //         return unit;
+  //       }),
+  //     );
+  //   }
 
-    return this.courseRepository.save(course);
-  }
+  //   return this.courseRepository.save(course);
+  // }
+
+  // async updateCourse(courseId: number, userId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+  //   // Step 1: Find the course by ID
+  //   const course = await this.courseRepository.findOne({ where: { id: courseId } });
+
+  //   if (!course) {
+  //     throw new NotFoundException(`Course with ID ${courseId} not found`);
+  //   }
+
+  //   // Step 2: Check if the user is authorized to update the course
+  //   if (course.createdBy !== userId) {
+  //     throw new ForbiddenException('You are not allowed to edit this course');
+  //   }
+
+  //   // Step 3: Update the course
+  //   Object.assign(course, updateCourseDto);
+  //   return this.courseRepository.save(course);
+  // }
 
   // Helper method to make a request to ChatGPT API and retrieve the course plan using fetch
   private async getCoursePlanFromChatGPT(

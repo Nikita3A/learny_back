@@ -46,19 +46,19 @@ export class CoursesController {
     }
   }
 
-  @Put('/:id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async updateCourse(
-    @Param('id') courseId: number,
-    @Body() updateCourseDto: UpdateCourseDto,
-    @GetUserFromToken('id') userId: number,
-  ): Promise<Course> {
-    const updatedCourse = await this.coursesService.updateCourse(courseId, updateCourseDto, userId);
-    if (!updatedCourse) {
-      throw new ForbiddenException('You are not authorized to update this course.');
-    }
-    return updatedCourse;
-  }
+  // @Put('/:id')
+  // @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  // async updateCourse(
+  //   @Param('id') courseId: number,
+  //   @Body() updateCourseDto: UpdateCourseDto,
+  //   @GetUserFromToken('id') userId: number,
+  // ): Promise<Course> {
+  //   const updatedCourse = await this.coursesService.updateCourse(courseId, updateCourseDto, userId);
+  //   if (!updatedCourse) {
+  //     throw new ForbiddenException('You are not authorized to update this course.');
+  //   }
+  //   return updatedCourse;
+  // }
 }
 
