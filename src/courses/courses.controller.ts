@@ -1,12 +1,12 @@
 // src/courses/courses.controller.ts
 import { Controller, Post, Body, Get, Param, UseGuards, Delete, ForbiddenException, Put } from '@nestjs/common';
 import { CoursesService } from './courses.service';
-import { CreateCourseDto } from './models/course.interface';
+import { CreateCourseDto } from './dtos/course.interface';
 import { Course } from './models/course.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { GetUserFromToken } from 'src/auth/decorators/getUser';
-import { UpdateCourseDto } from './models/UpdateCourseDto.model';
+import { UpdateCourseDto } from './dtos/UpdateCourseDto.model';
 
 @Controller('courses')
 export class CoursesController {

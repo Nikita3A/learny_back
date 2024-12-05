@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany } from 'typeorm';
 import { User } from '../../users/models/user.entity';
-import { Unit } from './unit.entity';
-
+import { Unit } from '../../units/models/unit.entity';
 @Entity()
 export class Course {
   @PrimaryGeneratedColumn()

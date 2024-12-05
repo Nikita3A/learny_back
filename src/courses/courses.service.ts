@@ -3,12 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './models/course.entity';
-import { Unit } from './models/unit.entity';
-import { Lesson } from './models/lesson.entity';
-import { CreateCourseDto } from './models/course.interface';
+import { Unit } from '../units/models/unit.entity';
+import { Lesson } from '../lessons/models/lesson.entity';
+import { CreateCourseDto } from './dtos/course.interface';
 import { AiService } from '../ai/ai.service';
 import { UsersService } from 'src/users/users.service';
-import { UpdateCourseDto } from './models/UpdateCourseDto.model';
+import { UpdateCourseDto } from './dtos/UpdateCourseDto.model';
 
 @Injectable()
 export class CoursesService {
