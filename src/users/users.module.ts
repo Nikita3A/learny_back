@@ -9,6 +9,6 @@ import { Token } from 'src/oauth/models/token.entity';
   imports: [TypeOrmModule.forFeature([User, Token])],
   providers: [UsersService],
   controllers: [UsersController],
-  // exports: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

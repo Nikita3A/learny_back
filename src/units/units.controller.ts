@@ -14,9 +14,9 @@ export class UnitsController {
   @Post('/')
   async createUnit(
     @Param('courseId') courseId: number,
-    @Body() createUnitDto: CreateUnitDto,
+    @Body() userPrompt: string,
   ) {
-    return this.unitsService.createUnit(courseId, createUnitDto);
+    return this.unitsService.createUnit(courseId, userPrompt);
   }
 
   @Get('/')

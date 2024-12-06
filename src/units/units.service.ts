@@ -1,32 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Unit } from './models/unit.entity';
 import { Course } from '../courses/models/course.entity';
 import { CreateUnitDto } from './dtos/create-unit.dto';
+import { CoursesService } from 'src/courses/courses.service';
+import { AiService } from 'src/ai/ai.service';
+import { LessonsService } from 'src/lessons/lessons.service';
 // import { UpdateUnitDto } from './dto/update-unit.dto';
 
 @Injectable()
 export class UnitsService {
   constructor(
+    private coursesService: CoursesService,
+    private aiService: AiService,
+    private lessonsService: LessonsService,
     @InjectRepository(Unit) private readonly unitRepository: Repository<Unit>,
-    @InjectRepository(Course) private readonly courseRepository: Repository<Course>,
   ) {}
 
-  async createUnit(courseId: number, createUnitDto: CreateUnitDto): Promise<Unit> {
-    const course = await this.courseRepository.findOneBy({ id: courseId });
+  async createUnit(courseId: number, userPrompt: string): Promise<Unit> {
+    const course = await this.coursesService.getCourseById(courseId);
     if (!course) {
-      throw new Error('Course not found');
+      throw new NotFoundException('Course not found.');
     }
+  
+    const prompt = `
+      You are an AI tasked with creating a new unit for a course.
+      The course is titled "${course.theme}" and is designed for "${course.targetAudience}".
+      Existing units in the course:
+      ${course.units.map((unit) => `- ${unit.title}`).join('\n') || 'None'}
+    
+      Additional user input for context: "${userPrompt}"
+    
+      Using this information, generate a JSON response in the following format:
+      {
+        "title": "Unit Title",
+        "lessons": ["Lesson 1 Title", "Lesson 2 Title", "Lesson 3 Title"]
+      }
+    
+      **Important:** Respond only with the JSON object above. Do not include any additional text, explanations, or comments. Just the JSON.
+    `;
+  
+    const aiResponse = await this.aiService.generateWithGroq(prompt);
+    
+    const { title, lessons } = JSON.parse(aiResponse);
 
-    const unit = this.unitRepository.create({ ...createUnitDto, course });
-    return this.unitRepository.save(unit);
+    const newUnit = this.unitRepository.create({ title, course });
+    const savedUnit = await this.unitRepository.save(newUnit);
+  
+    for (const lessonTitle of lessons) {
+      await this.lessonsService.createLesson(savedUnit.id, lessonTitle);
+    }
+  
+    return savedUnit;
   }
+  
 
   async getUnitsByCourse(courseId: number): Promise<Unit[]> {
     return this.unitRepository.find({
       where: { course: { id: courseId } },
-      relations: ['lessons'],
+      relations: ['lessons', 'course'],
     });
   }
 

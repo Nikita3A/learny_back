@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
-import { LessonsService } from './lessons.service';
-import { LessonsController } from './lessons.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Course } from 'src/courses/models/course.entity';
-import { Unit } from 'src/units/models/unit.entity';
-import { User } from 'src/users/models/user.entity';
+import { LessonsService } from './lessons.service';
 import { Lesson } from './models/lesson.entity';
-import { UnitsService } from 'src/units/units.service';
+import { AiService } from 'src/ai/ai.service';
+import { UnitsModule } from 'src/units/units.module'; // Import UnitsModule to use UnitsService
+import { LessonsController } from './lessons.controller';
+import { Unit } from 'src/units/models/unit.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Course, Unit, Lesson, User])
+    TypeOrmModule.forFeature([Lesson, Unit]),
   ],
-  providers: [LessonsService, UnitsService],
-  controllers: [LessonsController]
+  controllers: [LessonsController],
+  providers: [LessonsService, AiService],
+  exports: [LessonsService],
 })
 export class LessonsModule {}

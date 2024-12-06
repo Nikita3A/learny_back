@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards, Patch, All, NotFoundException } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from './dtos/create-lesson.dto';
 // import { UpdateLessonDto } from './dto/update-lesson.dto';
@@ -11,12 +11,19 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}
 
+  // @All('*')
+  // handleAllRequests(@Param() params, @Body() body) {
+  //   console.log('Params:', params);
+  //   console.log('Body:', body);
+  //   throw new NotFoundException('Route not found');
+  // }
+  
   @Post('/')
-  async createLesson(
+  async generateLesson(
     @Param('unitId') unitId: number,
     @Body() userPrompt: string,
   ) {
-    return this.lessonsService.createLesson(unitId, userPrompt);
+    return this.lessonsService.generateLesson(unitId, userPrompt);
   }
 
   @Get('/')
@@ -37,10 +44,10 @@ export class LessonsController {
 //     return this.lessonsService.updateLesson(id, updateLessonDto);
 //   }
 
-  @Patch('/:lessonId')
+  @Patch('/:id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async generateLessonContent(@Param('lessonId') lessonId: number): Promise<{ message: string }> {
+  async generateLessonContent(@Param('id') lessonId: number): Promise<{ message: string }> {
     await this.lessonsService.generateLessonContent(lessonId);
     return { message: 'Lesson content successfully generated.' };
   }

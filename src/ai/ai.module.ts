@@ -28,6 +28,6 @@ import Groq from 'groq-sdk';
     },
     AiService,
   ],
-  exports: ['OPENAI_API', AiService],
+  exports: ['OPENAI_API', 'GROQ_CLIENT', AiService],
 })
 export class AiModule {}

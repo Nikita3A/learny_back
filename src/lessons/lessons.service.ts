@@ -6,19 +6,24 @@ import { Lesson } from './models/lesson.entity';
 // import { CreateLessonDto } from './dtos/create-lesson.dto';
 import { AiService } from 'src/ai/ai.service';
 import { UnitsService } from 'src/units/units.service';
+import { Unit } from 'src/units/models/unit.entity';
 // import { UpdateLessonDto } from './dto/update-lesson.dto';
 
 @Injectable()
 export class LessonsService {
   constructor(
     private aiService: AiService,
-    private unitsService: UnitsService,
     @InjectRepository(Lesson) private readonly lessonRepository: Repository<Lesson>,
+    @InjectRepository(Unit) private readonly unitsRepository: Repository<Unit>,
+
   ) {}
 
-  async createLesson(unitId: number, userPrompt): Promise<Lesson> {
-    const unit = await this.unitsService.getUnitById(unitId);
-    
+  async generateLesson(unitId: number, userPrompt)/*: Promise<Lesson>*/ {
+    const unit = await this.unitsRepository.findOne({
+      where: { id: unitId },
+      relations: ['lessons'],
+    });
+        
     if (!unit) {
       throw new NotFoundException('Unit not found.');
     }
@@ -46,6 +51,26 @@ export class LessonsService {
     const lesson = this.lessonRepository.create({
       title,
       content,
+      unit,
+    });
+
+    return this.lessonRepository.save(lesson);
+  }
+
+  async createLesson(unitId: number, lessonTitle)/*: Promise<Lesson>*/ {
+    console.log(lessonTitle);
+    
+    const unit = await this.unitsRepository.findOne({
+      where: { id: unitId },
+      relations: ['lessons'],
+    });
+        
+    if (!unit) {
+      throw new NotFoundException('Unit not found.');
+    }
+
+    const lesson = this.lessonRepository.create({
+      title: lessonTitle,
       unit,
     });
 
