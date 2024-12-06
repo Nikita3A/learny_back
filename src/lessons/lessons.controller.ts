@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards, Patch } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from './dtos/create-lesson.dto';
 // import { UpdateLessonDto } from './dto/update-lesson.dto';
@@ -14,9 +14,9 @@ export class LessonsController {
   @Post('/')
   async createLesson(
     @Param('unitId') unitId: number,
-    @Body() createLessonDto: CreateLessonDto,
+    @Body() userPrompt: string,
   ) {
-    return this.lessonsService.createLesson(unitId, createLessonDto);
+    return this.lessonsService.createLesson(unitId, userPrompt);
   }
 
   @Get('/')
@@ -36,6 +36,14 @@ export class LessonsController {
 //   ) {
 //     return this.lessonsService.updateLesson(id, updateLessonDto);
 //   }
+
+  @Patch('/:lessonId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async generateLessonContent(@Param('lessonId') lessonId: number): Promise<{ message: string }> {
+    await this.lessonsService.generateLessonContent(lessonId);
+    return { message: 'Lesson content successfully generated.' };
+  }
 
   @Delete('/:id')
   async deleteLesson(@Param('id') id: number) {

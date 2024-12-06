@@ -9,6 +9,9 @@ export class Lesson {
   @Column()
   title: string;
 
+  @Column('text', { nullable: true })
+  content: string;
+
   @ManyToOne(() => Unit, (unit) => unit.lessons, { onDelete: 'CASCADE' })
   unit: Unit;
 }

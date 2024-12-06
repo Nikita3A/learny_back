@@ -33,7 +33,7 @@ export class UnitsService {
   async getUnitById(id: number): Promise<Unit> {
     return this.unitRepository.findOne({
       where: { id },
-      relations: ['lessons', 'course'],
+      relations: ['lessons'],
     });
   }
 
