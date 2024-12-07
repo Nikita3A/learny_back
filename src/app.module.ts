@@ -11,6 +11,7 @@ import { CoursesModule } from './courses/courses.module';
 import { AiModule } from './ai/ai.module';
 import { UnitsModule } from './units/units.module';
 import { LessonsModule } from './lessons/lessons.module';
+import { TestsModule } from './tests/tests.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { LessonsModule } from './lessons/lessons.module';
     AiModule,
     UnitsModule,
     LessonsModule,
+    TestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

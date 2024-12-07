@@ -30,9 +30,16 @@ export class ChatService {
     return this.messagesRepository.save(message);
   }
 
+  // async getChatsOfUser(user: User): Promise<Chat[]> {
+  //   return this.chatsRepository.find({ where: { users: user } });
+  // }
   async getChatsOfUser(user: User): Promise<Chat[]> {
-    return this.chatsRepository.find({ where: { users: user } });
+    return this.chatsRepository.find({
+      where: { users: { id: user.id } }, // Use the user's ID for filtering
+      relations: ['users'], // Ensure the `users` relation is loaded
+    });
   }
+  
 
   async getMessages(chatId): Promise<Message[]> {
     return await this.messagesRepository.find({
