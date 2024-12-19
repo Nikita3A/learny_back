@@ -107,12 +107,15 @@ export class LessonsService {
     }
 
     const prompt = `
-      You are an AI tasked with generating content for a lesson.
-      The lesson is titled "${lesson.title}" and belongs to the course unit "${lesson.unit.title}".
-
-      Generate detailed and structured content that aligns with the lesson's title and the unit's overall theme.
-      The response should be in plain text and should provide clear, comprehensive, and engaging educational material.
-    `;
+    Generate detailed and structured content for a lesson.
+    The lesson is titled "${lesson.title}" and belongs to the course unit "${lesson.unit.title}".
+  
+    The content must align with the lesson's title and the unit's overall theme. 
+    Exclude any introductory statements or phrases like "Here is the content" or "The following is about." 
+    Provide only the educational material in plain text, formatted with sections clearly separated by titles or labels. 
+    Do not use special symbols like asterisks (*), hashtags (#), or double stars (**). Symbols like &, %, $, and brackets () are allowed.
+  `;
+  
 
     const aiResponse = await this.aiService.generateWithGroq(prompt);
 

@@ -4,10 +4,11 @@ import { CreateLessonDto } from './dtos/create-lesson.dto';
 // import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtStrategy } from 'src/auth/guards/jwt-strategy';
 
 @Controller('units/:unitId/lessons')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtStrategy)
 export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}
 
@@ -45,8 +46,6 @@ export class LessonsController {
 //   }
 
   @Patch('/:id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   async generateLessonContent(@Param('id') lessonId: number): Promise<{ message: string }> {
     await this.lessonsService.generateLessonContent(lessonId);
     return { message: 'Lesson content successfully generated.' };
