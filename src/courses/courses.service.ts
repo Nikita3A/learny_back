@@ -133,7 +133,7 @@ export class CoursesService {
 
     return this.courseRepository.find({
       where: { createdBy: userId },
-      relations: ['units', 'units.lessons'],
+      // relations: ['units', 'units.lessons'],
     });
   }
 
