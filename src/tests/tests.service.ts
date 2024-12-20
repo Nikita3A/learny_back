@@ -28,23 +28,25 @@ export class TestsService {
       {
         "questionText": "Question text",
         "options": ["Option 1", "Option 2", "Option 3"],
-        "correctAnswer": "Correct option text",
+        "correctAnswer": "Option", // or ["Option 1", "Option 2"]
         "type": "single" // or "multiple" or "text"
       },
       ...
     ]
-    **Important:** Respond only with the JSON object above. Do not include any additional text, explanations, or comments. Just the JSON.`
+    **Important:** Respond only with the JSON object above. Do not include any additional text, explanations, or comments. Just the JSON.
+    **Important:** For correctAnswer should be only string of text. For many option use ";" to separate options in string. Don't use any brackets.`
     : `Generate test questions as a JSON array based on the lesson title:\n\n"${lesson.title}"\n\nEach question should follow this structure:
     [
       {
         "questionText": "Question text",
         "options": ["Option 1", "Option 2", "Option 3"],
-        "correctAnswer": "Correct option text",
+        "correctAnswer": "Option", // or ["Option 1", "Option 2"]
         "type": "single" // or "multiple" or "text"
       },
       ...
     ]
-    **Important:** Respond only with the JSON object above. Do not include any additional text, explanations, or comments. Just the JSON.`;
+    **Important:** Respond only with the JSON object above. Do not include any additional text, explanations, or comments. Just the JSON.
+    **Important:** For correctAnswer should be only string of text. For many option use ";" to separate options in string. Don't use any brackets.`;
   
     const aiResponse = await this.aiService.generateWithGroq(aiPrompt);
     console.log('res: ', aiResponse);
