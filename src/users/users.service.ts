@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observable, from, catchError, switchMap, map } from 'rxjs';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
@@ -6,6 +6,7 @@ import { User } from './models/user.entity';
 import { IUser } from './models/user.interface';
 import { AuthService } from '../auth/auth.service';
 import { Course } from 'src/courses/models/course.entity';
+import * as bcrypt from 'bcrypt';
 // import { User } from '../users/models/user.entity';
 @Injectable()
 export class UsersService {
@@ -47,6 +48,35 @@ export class UsersService {
   async findOneByUserName(username: string): Promise<User> {
     return this.usersRepository.findOneBy({ username });
   }
+
+  async update(id: number, updateUserDTO: Partial<IUser>): Promise<IUser> {
+    // Find the existing user
+    const existingUser = await this.findOne(id);
+  
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+  
+    // Merge the existing user's data with the new data
+    const updatedData: Partial<IUser> = { ...existingUser };
+  
+    if (updateUserDTO.username) {
+      updatedData.username = updateUserDTO.username;
+    }
+  
+    if (updateUserDTO.password) {
+      // Hash the new password
+      const passwordHash = await bcrypt.hash(updateUserDTO.password, 10);
+      updatedData.password = passwordHash;
+    }
+  
+    // Update the user in the database
+    await this.usersRepository.update(id, updatedData);
+  
+    // Return the updated user
+    return this.findOne(id);
+  }
+  
 
   remove(id: string): Observable<DeleteResult> {
     return from(this.usersRepository.delete(id));

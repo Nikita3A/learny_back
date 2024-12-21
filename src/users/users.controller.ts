@@ -7,10 +7,13 @@ import {
   Put,
   UseGuards,
   Headers,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { UsersService } from './users.service';
 import { IUser, UserRole } from './models/user.interface';
+import { UpdateUserDTO } from './dtos/update.dto';
 import { DeleteResult } from 'typeorm';
 
 import {
@@ -20,7 +23,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UpdateUserDTO } from './models/user.model';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -58,6 +60,33 @@ export class UsersController {
   async getUserById(@Param('id') id): Promise<IUser> {
     return await this.usersService.findOne(id);
   }
+
+  @Put('/:id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDTO: UpdateUserDTO,
+  ): Promise<IUser> {
+    const userId = parseInt(id, 10); // Convert `id` to a number
+    if (isNaN(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+  
+    const existingUser = await this.usersService.findOne(userId);
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+  
+    if (updateUserDTO.username) {
+      const usernameExists = await this.usersService.findOneByUserName(updateUserDTO.username);
+      if (usernameExists && usernameExists.id !== userId) {
+        throw new BadRequestException('Username already taken');
+      }
+    }
+  
+    return this.usersService.update(userId, updateUserDTO);
+  }
+  
+
 
   @ApiBearerAuth()
   @ApiParam({
