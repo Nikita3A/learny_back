@@ -29,6 +29,12 @@ import { AuthGuard } from '@nestjs/passport';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+
+  @Get('/:username')
+  async getUserByUserName(@Param('username') username: string) {
+    return this.usersService.findOneByUserName(username);
+  }
+
   @Get('/')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

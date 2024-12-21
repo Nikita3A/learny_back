@@ -67,8 +67,6 @@ export class ChatService {
       where: { id: Number(chatId) },
       relations: ['users'],
     });
-
-    console.log('1: ', chat);
     
     if (!chat) {
       throw new NotFoundException(`Chat with id ${chatId} not found`);
@@ -77,7 +75,6 @@ export class ChatService {
     const user = await this.userService.findOneById(userId);
 
     chat.users.push(user);
-    console.log('2: ', chat);
 
     await this.chatsRepository.save(chat);
     return chat;
