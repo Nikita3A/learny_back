@@ -16,11 +16,6 @@ export class ChatService {
     private userService: UsersService,
   ) {}
 
-  // async sendMessage(user: User, chat: Chat, text: string): Promise<Message> {
-  //   const message = this.messagesRepository.create({ user, chat, text });
-  //   return this.messagesRepository.save(message);
-  // }
-
   async sendMessage(text: string, user: any, chat: any): Promise<Message> {
     const message = this.messagesRepository.create({
       text: text,
@@ -30,9 +25,6 @@ export class ChatService {
     return this.messagesRepository.save(message);
   }
 
-  // async getChatsOfUser(user: User): Promise<Chat[]> {
-  //   return this.chatsRepository.find({ where: { users: user } });
-  // }
   async getChatsOfUser(user: User): Promise<Chat[]> {
     return this.chatsRepository.find({
       where: { users: { id: user.id } }, // Use the user's ID for filtering
@@ -40,7 +32,6 @@ export class ChatService {
     });
   }
   
-
   async getMessages(chatId): Promise<Message[]> {
     return await this.messagesRepository.find({
       where: { chat: { id: chatId } },
@@ -71,20 +62,14 @@ export class ChatService {
     return chat;
   }
 
-  // async sendMessage(id: string, sendMessageDto) {
-  //   const chat = await this.chatsRepository.findOne(id);
-  //   const newMessage = this.messagesRepository.create(sendMessageDto);
-  //   newMessage.chat = chat;
-  //   await this.messagesRepository.save(newMessage);
-  //   return newMessage;
-  // }
-
   async addUser(chatId: string | number, userId: string | number) {
     const chat = await this.chatsRepository.findOne({
       where: { id: Number(chatId) },
       relations: ['users'],
     });
 
+    console.log('1: ', chat);
+    
     if (!chat) {
       throw new NotFoundException(`Chat with id ${chatId} not found`);
     }
@@ -92,6 +77,8 @@ export class ChatService {
     const user = await this.userService.findOneById(userId);
 
     chat.users.push(user);
+    console.log('2: ', chat);
+
     await this.chatsRepository.save(chat);
     return chat;
   }

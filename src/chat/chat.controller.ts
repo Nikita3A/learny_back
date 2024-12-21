@@ -14,8 +14,8 @@ import { ChatService } from './chat.service';
 export class ChatsController {
   constructor(private readonly chatService: ChatService) {}
   @Post()
-  async createChat(@Body() createChatDto) {
-    return this.chatService.createChat(createChatDto);
+  async createChat(@Body() name: string) {
+    return this.chatService.createChat(name);
   }
 
   @Get()
