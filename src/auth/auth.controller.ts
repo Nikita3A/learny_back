@@ -52,16 +52,6 @@ export class AuthController {
   @Post('signin')
   @ApiBody({ type: SignInDTO })
   async signin(@Body() user: SignInDTO) {
-    const isUserExist = await this.usersService.findOneByEmail(user.email);
-
-    if (!isUserExist)
-      throw new HttpException(
-        'User with such email does not exist',
-        HttpStatus.FORBIDDEN,
-      );
-    if (isUserExist.isEmailVerified == false)
-      throw new HttpException('Verify your email', HttpStatus.FORBIDDEN);
-
     return this.authService.signin(user);
   }
 
