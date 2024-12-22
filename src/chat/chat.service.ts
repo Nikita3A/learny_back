@@ -41,7 +41,8 @@ export class ChatService {
   }
 
   async createChat(createChatDto) {
-    const user = await this.userService.findOneById(createChatDto.userId);
+    const user = await this.userService.findOneById(createChatDto.id);
+    
     const newChat = this.chatsRepository.create({
       name: createChatDto.name,
       users: [user],
