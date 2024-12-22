@@ -1,50 +1,32 @@
+# Learny Back-End
 
-## Description
-Social app backend. 
+This project contains the back-end code for the Learny app, designed to provide AI-generated courses and tests.
 
-## Running the app
+## Prerequisites
 
-### Prerequisites:
-    1. Docker compose or psql DB
-    2. Create .env file and add your DB connection credentials
-    3. For docker-compose in the root folder of the project run: docker-compose up -d. Then rename .env.example to .env 
-    4. Run: npm i
-    
+Before you begin, ensure you have the following requirements installed:
+
+- Node.js version 18.18.2 or later.
+- Docker, Docker Compose, or PostgreSQL v13.4.
+
+## Running the Project with Docker Compose
+
+To run the project and install dependencies, navigate to the root directory of the project and execute the following commands:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker-compose up
 ```
-
-## Test
-
+Then, install the project dependencies by running:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
+Alternatively, if you encounter issues, you can force the installation with:
+```bash
+npm install --force
+```
+## Troubleshooting
+If you encounter the following error:
 
-## Support
+> [!CAUTION] 
+The GROQ_API_KEY environment variable is missing or empty. Either provide it, or instantiate the Groq client with an apiKey option, like new Groq({ apiKey: 'My API Key' }).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
-# learny_back
+To fix this, you need to generate a new API key by visiting https://groq.com/ and paste it into the .env file in project.
