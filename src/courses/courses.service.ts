@@ -21,11 +21,20 @@ export class CoursesService {
     private unitRepository: Repository<Unit>,
     @InjectRepository(Lesson)
     private lessonRepository: Repository<Lesson>,
-  ) {}   
-  
-  async createCourse(createCourseDto: CreateCourseDto, userId: number): Promise<Course> {
-    const { language, theme, targetAudience, learningObjectives, courseStructure } = createCourseDto;
-  
+  ) {}
+
+  async createCourse(
+    createCourseDto: CreateCourseDto,
+    userId: number,
+  ): Promise<Course> {
+    const {
+      language,
+      theme,
+      targetAudience,
+      learningObjectives,
+      courseStructure,
+    } = createCourseDto;
+
     const prompt = `You are an AI tasked with creating a course plan. Please respond only with a valid JSON object. 
     The course plan should have the following structure:
     
@@ -53,7 +62,7 @@ export class CoursesService {
 
     const aiResponse = await this.aiService.generateWithGroq(prompt);
     const coursePlan = this.parseCoursePlanResponse(aiResponse);
-  
+
     const course = this.courseRepository.create({
       language,
       theme,
@@ -63,60 +72,76 @@ export class CoursesService {
       createdBy: userId,
       units: [],
     });
-  
+
+    // assign explicit positions (1-based)
+    let unitPosition = 1;
     for (const unitData of coursePlan.units) {
       const unit = new Unit();
       unit.title = unitData.title;
-      unit.lessons = unitData.lessons.map((lessonTitle) => {
+      unit.position = unitPosition++;
+      unit.lessons = (unitData.lessons || []).map((lessonTitle, idx) => {
         const lesson = new Lesson();
         lesson.title = lessonTitle;
+        lesson.position = idx + 1;
         return lesson;
       });
       course.units.push(unit);
     }
 
     const savedCourse = await this.courseRepository.save(course);
-  
+
     await this.usersService.addCourseToUser(userId, savedCourse);
-  
+
     return savedCourse;
   }
 
-  private parseCoursePlanResponse(response: string | object): { units: { title: string; lessons: string[] }[] } {
+  private parseCoursePlanResponse(response: string | object): {
+    units: { title: string; lessons: string[] }[];
+  } {
     let parsedResponse;
-  
+
     try {
       // If the response is a string, parse it as JSON
-      parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+      parsedResponse =
+        typeof response === 'string' ? JSON.parse(response) : response;
     } catch (error) {
       console.error('Error parsing JSON:', error);
       throw new Error('Invalid JSON response');
     }
-  
+
     // Validate that the response has the required structure
     if (!parsedResponse || !Array.isArray(parsedResponse.units)) {
       console.error('Invalid response structure:', parsedResponse);
       throw new Error('Response does not contain valid units');
     }
-  
+
     // Normalize the structure if needed (e.g., handle variations in model responses)
     const normalizedUnits = parsedResponse.units.map((unit: any) => {
       if (typeof unit.title !== 'string' || !Array.isArray(unit.lessons)) {
         throw new Error('Invalid unit structure');
       }
-  
+
       return {
         title: unit.title,
-        lessons: unit.lessons.filter((lesson: any) => typeof lesson === 'string'), // Ensure lessons are strings
+        lessons: unit.lessons.filter(
+          (lesson: any) => typeof lesson === 'string',
+        ), // Ensure lessons are strings
       };
     });
-  
+
     return { units: normalizedUnits };
   }
-  
+
   async getAllCourses(): Promise<Course[]> {
     return this.courseRepository.find({
-      select: ['id', 'language', 'theme', 'targetAudience', 'learningObjectives', 'courseStructure'],
+      select: [
+        'id',
+        'language',
+        'theme',
+        'targetAudience',
+        'learningObjectives',
+        'courseStructure',
+      ],
     });
   }
 
@@ -222,7 +247,10 @@ export class CoursesService {
     The plan should include units and each unit should have a list of lesson titles.`;
 
     try {
-      const response = await this.aiService.generateWithOpenAI(prompt, 'gpt-3.5-turbo');
+      const response = await this.aiService.generateWithOpenAI(
+        prompt,
+        'gpt-3.5-turbo',
+      );
       const coursePlan = JSON.parse(response);
       return coursePlan;
     } catch (error) {

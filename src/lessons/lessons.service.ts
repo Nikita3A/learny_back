@@ -13,17 +13,17 @@ import { Unit } from 'src/units/models/unit.entity';
 export class LessonsService {
   constructor(
     private aiService: AiService,
-    @InjectRepository(Lesson) private readonly lessonRepository: Repository<Lesson>,
+    @InjectRepository(Lesson)
+    private readonly lessonRepository: Repository<Lesson>,
     @InjectRepository(Unit) private readonly unitsRepository: Repository<Unit>,
-
   ) {}
 
-  async generateLesson(unitId: number, userPrompt)/*: Promise<Lesson>*/ {
+  async generateLesson(unitId: number, userPrompt) /*: Promise<Lesson>*/ {
     const unit = await this.unitsRepository.findOne({
       where: { id: unitId },
       relations: ['lessons'],
     });
-        
+
     if (!unit) {
       throw new NotFoundException('Unit not found.');
     }
@@ -57,23 +57,26 @@ export class LessonsService {
     return this.lessonRepository.save(lesson);
   }
 
-  async createLesson(unitId: number, lessonTitle)/*: Promise<Lesson>*/ {
-    console.log(lessonTitle);
-    
-    const unit = await this.unitsRepository.findOne({
-      where: { id: unitId },
-      relations: ['lessons'],
-    });
-        
-    if (!unit) {
-      throw new NotFoundException('Unit not found.');
+  // change signature to accept optional position and compute fallback
+  async createLesson(
+    unitId: number,
+    title: string,
+    position?: number,
+  ): Promise<Lesson> {
+    if (position == null) {
+      const maxRes = await this.lessonRepository
+        .createQueryBuilder('l')
+        .select('MAX(l.position)', 'max')
+        .where('l.unitId = :unitId', { unitId })
+        .getRawOne();
+      position = (Number(maxRes?.max) || 0) + 1;
     }
 
     const lesson = this.lessonRepository.create({
-      title: lessonTitle,
-      unit,
+      title,
+      position,
+      unit: { id: unitId } as any,
     });
-
     return this.lessonRepository.save(lesson);
   }
 
@@ -91,12 +94,12 @@ export class LessonsService {
     });
   }
 
-//   async updateLesson(id: number, updateLessonDto: UpdateLessonDto): Promise<Lesson> {
-//     await this.lessonRepository.update(id, updateLessonDto);
-//     return this.getLessonById(id);
-//   }
+  //   async updateLesson(id: number, updateLessonDto: UpdateLessonDto): Promise<Lesson> {
+  //     await this.lessonRepository.update(id, updateLessonDto);
+  //     return this.getLessonById(id);
+  //   }
 
-  async generateLessonContent(lessonId: number): Promise<void> {    
+  async generateLessonContent(lessonId: number): Promise<void> {
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
       relations: ['unit'], // Ensures we have access to the parent unit
@@ -115,7 +118,6 @@ export class LessonsService {
     Provide only the educational material in plain text, formatted with sections clearly separated by titles or labels. 
     Do not use special symbols like asterisks (*), hashtags (#), or double stars (**). Symbols like &, %, $, and brackets () are allowed.
   `;
-  
 
     const aiResponse = await this.aiService.generateWithGroq(prompt);
 
