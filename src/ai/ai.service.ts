@@ -23,7 +23,7 @@ export class AiService {
     }
   }
 
-  async generateWithGroq(prompt: string, model = 'llama3-8b-8192'): Promise<string> {
+  async generateWithGroq(prompt: string, model = 'llama-3.1-8b-instant'): Promise<string> {
     try {
       const response = await this.groqClient.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],

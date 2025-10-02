@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/models/user.entity';
 import { Unit } from '../../units/models/unit.entity';
 @Entity()
@@ -24,9 +32,18 @@ export class Course {
   @Column('integer')
   createdBy: number;
 
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
+
   @ManyToMany(() => User, (user) => user.courses)
   users: User[];
 
-  @OneToMany(() => Unit, (unit) => unit.course, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => Unit, (unit) => unit.course, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   units: Unit[];
 }

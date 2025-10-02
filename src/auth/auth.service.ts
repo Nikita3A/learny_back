@@ -82,31 +82,33 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findOneByEmail(email);
-  
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-  
+
     // Await the password comparison
     const match = await this.comparePasswords(password, user.password);
-  
+
     if (!match) {
       throw new BadRequestException('Wrong password');
     }
-  
+
     // Exclude the password field before returning the user object
     const { password: userPassword, ...result } = user;
     return result;
-  }  
+  }
 
   hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
   }
 
-  comparePasswords(newPassword: string, passwordHash: string): Promise<boolean> {
+  comparePasswords(
+    newPassword: string,
+    passwordHash: string,
+  ): Promise<boolean> {
     return bcrypt.compare(newPassword, passwordHash);
   }
-  
 
   decodeToken(token: string) {
     const pureToken = token.split(' ')[1];
