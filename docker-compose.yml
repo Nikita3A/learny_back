@@ -1,7 +1,7 @@
 version: "3"
 services:
   postgres:
-    container_name: social-app
+    container_name: learny-postgres
     image: postgres:13.4
     environment:
       POSTGRES_USER: postgres
@@ -11,3 +11,15 @@ services:
       - "5432:5432"
     volumes:
       - /tmp/postgres:/tmp/postgres
+
+  redis:
+    image: redis:7-alpine
+    container_name: learny-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

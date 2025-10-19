@@ -12,11 +12,21 @@ import { AiModule } from './ai/ai.module';
 import { UnitsModule } from './units/units.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { TestsModule } from './tests/tests.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    BullModule.forRootAsync({
+      useFactory: (cfg: ConfigService) => ({
+        redis: {
+          host: cfg.get('REDIS_HOST') ?? 'redis',
+          port: Number(cfg.get('REDIS_PORT') ?? 6379),
+        },
+      }),
+      inject: [ConfigService],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (cfg: ConfigService) => ({
