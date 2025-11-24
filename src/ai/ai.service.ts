@@ -9,7 +9,10 @@ export class AiService {
     @Inject('OPENAI_API') private readonly openai: OpenAI, // Injecting OpenAI instance
   ) {}
 
-  async generateWithOpenAI(prompt: string, model = 'gpt-3.5-turbo'): Promise<string> {
+  async generateWithOpenAI(
+    prompt: string,
+    model = 'gpt-3.5-turbo',
+  ): Promise<string> {
     try {
       const response = await this.openai.chat.completions.create({
         model,
@@ -23,7 +26,10 @@ export class AiService {
     }
   }
 
-  async generateWithGroq(prompt: string, model = 'llama-3.1-8b-instant'): Promise<string> {
+  async generateWithGroq(
+    prompt: string,
+    model = 'llama-3.1-8b-instant',
+  ): Promise<string> {
     try {
       const response = await this.groqClient.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
