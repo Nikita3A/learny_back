@@ -197,8 +197,10 @@ export class TestsService {
 
     try {
       const aiPrompt = lesson.content
-        ? `Generate test questions as a JSON array based on the following content:\n\n${lesson.content}\n\n... Return only the JSON of the questions any other text or markers is not allowed.`
-        : `Generate test questions as a JSON array based on the lesson title:\n\n"${lesson.title}"\n\n... Return only the JSON of the questions any other text or markers is not allowed.`;
+        ? `Generate test questions as a JSON array based on the following content:\n\n${lesson.content}\n\n... 
+        Return only the JSON of the questions any other text or markers is not allowed. I need field "questionText", "options" (array of strings), "correctAnswer" (string), "type" ("single", "multiple", "text").`
+        : `Generate test questions as a JSON array based on the lesson title:\n\n"${lesson.title}"\n\n... 
+        Return only the JSON of the questions any other text or markers is not allowed. I need field "questionText", "options" (array of strings), "correctAnswer" (string), "type" ("single", "multiple", "text").`;
 
       const aiResponse = await this.aiService.generateWithGroq(aiPrompt);
       console.log('AI response:', aiResponse);
